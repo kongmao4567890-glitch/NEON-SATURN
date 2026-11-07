@@ -319,9 +319,9 @@ public:
 
     [[nodiscard]] ActionResult SaveStateToSlot(std::size_t slotIndex) {
         if (slotIndex >= kSaveStateSlotCount) {
-            return {.success = false, .message = "Invalid save state slot"};
+            return {.success = false, .message = "无效的即时存档位"};
         }
-        const std::string slotName = "Slot " + std::to_string(slotIndex + 1);
+        const std::string slotName = "存档位 " + std::to_string(slotIndex + 1);
 
         try {
             std::scoped_lock lock{m_coreMutex};
@@ -334,14 +334,14 @@ public:
             std::filesystem::create_directories(gameStatesPath, error);
             if (error) {
                 SDL_Log("Save state: cannot create %s: %s", gameStatesPath.c_str(), error.message().c_str());
-                return {.success = false, .message = "Could not prepare save state storage"};
+                return {.success = false, .message = "无法准备即时存档存储空间"};
             }
 
             const auto statePath = SaveStatePath(gameStatesPath, slotIndex);
             const bool written =
                 WriteFileAtomically(statePath, [&](std::ostream &out) { WriteSaveStateFile(out, *state); });
             if (!written) {
-                return {.success = false, .message = "Could not write " + slotName};
+                return {.success = false, .message = "无法写入" + slotName};
             }
             cheevos::AfterSaveState(statePath.string());
 
@@ -352,21 +352,21 @@ public:
                 std::filesystem::remove(thumbnailPath, error);
             }
 
-            return {.success = true, .message = "State saved to " + slotName};
+            return {.success = true, .message = "已保存到" + slotName};
         } catch (const std::exception &e) {
             SDL_Log("Save state to slot %zu failed: %s", slotIndex, e.what());
-            return {.success = false, .message = std::string{"Save failed: "} + e.what()};
+            return {.success = false, .message = std::string{"保存失败："} + e.what()};
         } catch (...) {
             SDL_Log("Save state to slot %zu failed", slotIndex);
-            return {.success = false, .message = "Save failed"};
+            return {.success = false, .message = "保存失败"};
         }
     }
 
     [[nodiscard]] ActionResult LoadStateFromSlot(std::size_t slotIndex) {
         if (slotIndex >= kSaveStateSlotCount) {
-            return {.success = false, .message = "Invalid save state slot"};
+            return {.success = false, .message = "无效的即时存档位"};
         }
-        const std::string slotName = "Slot " + std::to_string(slotIndex + 1);
+        const std::string slotName = "存档位 " + std::to_string(slotIndex + 1);
 
         try {
             std::scoped_lock lock{m_coreMutex};
@@ -383,25 +383,25 @@ public:
 
             if (!state->ValidateDiscHash(discHash)) {
                 SDL_Log("Load state: %s has a different disc hash", statePath.c_str());
-                return {.success = false, .message = slotName + " belongs to a different game"};
+                return {.success = false, .message = slotName + " 属于其他游戏"};
             }
 
             if (!m_saturn.LoadState(*state, true)) {
                 SDL_Log("Load state: core rejected %s", statePath.c_str());
-                return {.success = false, .message = "Could not load " + slotName};
+                return {.success = false, .message = "无法读取" + slotName};
             }
 
             cheevos::AfterLoadState(statePath.string());
             ResetInputs();
             // The recorded timeline no longer connects to the state we just jumped to.
             m_rewindBuffer.Reset();
-            return {.success = true, .message = "State loaded from " + slotName};
+            return {.success = true, .message = "已从" + slotName + "读取"};
         } catch (const std::exception &e) {
             SDL_Log("Load state from slot %zu failed: %s", slotIndex, e.what());
-            return {.success = false, .message = std::string{"Load failed: "} + e.what()};
+            return {.success = false, .message = std::string{"读取失败："} + e.what()};
         } catch (...) {
             SDL_Log("Load state from slot %zu failed", slotIndex);
-            return {.success = false, .message = "Load failed"};
+            return {.success = false, .message = "读取失败"};
         }
     }
 
@@ -1648,7 +1648,7 @@ Java_com_izzy2lost_neonsaturn_EmulatorActivity_nativeSaveState(JNIEnv *env, jobj
         return env->NewStringUTF(app->SaveStateToSlot(static_cast<std::size_t>(slotIndex)).message.c_str());
     }
 
-    return env->NewStringUTF("Emulator is not ready yet");
+    return env->NewStringUTF("模拟器尚未就绪");
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -1657,7 +1657,7 @@ Java_com_izzy2lost_neonsaturn_EmulatorActivity_nativeLoadState(JNIEnv *env, jobj
         return env->NewStringUTF(app->LoadStateFromSlot(static_cast<std::size_t>(slotIndex)).message.c_str());
     }
 
-    return env->NewStringUTF("Emulator is not ready yet");
+    return env->NewStringUTF("模拟器尚未就绪");
 }
 
 extern "C" JNIEXPORT jstring JNICALL

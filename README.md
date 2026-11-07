@@ -1,5 +1,14 @@
 # NEON SATURN
 
+> **简体中文汉化版**：本分支已对应用界面进行完整汉化（设置向导、游戏库、设置、快捷菜单、即时存档、触屏按键、成就、关于/致谢等），
+> 并将原生模拟器层（C++）返回给界面的提示信息（存读档结果、RetroAchievements 弹窗与错误信息）一并汉化。界面固定显示中文，与系统语言无关。
+>
+> **在 GitHub 上编译**：推送代码后，`.github/workflows/android.yaml` 会自动构建 arm64-v8a 的 Release APK，
+> 可在 Actions 运行页面的 Artifacts 中下载；推送 `android-v*` 标签会自动发布到 Releases。
+> 如需使用固定的正式签名，请在仓库 Secrets 中配置 `ANDROID_KEYSTORE_BASE64`、`ANDROID_KEYSTORE_PASSWORD`、
+> `ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD`；未配置时使用 CI 自动生成并缓存的签名密钥。
+> 游戏内由服务器返回的成就标题/描述及游戏本身的文本不在汉化范围内。
+
 An Android port of [Ymir](https://github.com/StrikerX3/Ymir), StrikerX3's work-in-progress Sega Saturn emulator.
 
 NEON SATURN keeps Ymir's emulation core as-is and replaces the desktop frontend with a native Android

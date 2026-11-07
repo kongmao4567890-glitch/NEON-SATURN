@@ -26,7 +26,7 @@ data class GameLibraryEntry(
 
 fun Context.scanGameLibrary(treeUri: Uri): List<GameLibraryEntry> {
     val root = DocumentFile.fromTreeUri(this, treeUri)
-        ?: throw IOException("Unable to open the selected games folder")
+        ?: throw IOException(getString(R.string.error_open_games_folder))
 
     val entries = mutableListOf<GameLibraryEntry>()
     val pending = ArrayDeque<Pair<DocumentFile, String>>()
@@ -102,11 +102,11 @@ fun Context.stageGameForLaunch(
             target.outputStream().use { output ->
                 input.copyTo(output)
             }
-        } ?: throw IOException("Unable to read ${source.name} from the games folder")
+        } ?: throw IOException(getString(R.string.error_read_from_games_folder, source.name))
     }
 
     return File(stageRoot, entry.launchFileName).takeIf(File::isFile)
-        ?: throw IOException("Unable to prepare ${entry.title} for launch")
+        ?: throw IOException(getString(R.string.error_prepare_for_launch, entry.title))
 }
 
 private fun Context.resolveCueFiles(

@@ -28,7 +28,7 @@ class ContentImporter(
         val target = uniqueFile(targetDir, sanitizeFileName(displayName))
 
         val inputStream = context.contentResolver.openInputStream(uri)
-            ?: throw IOException("Unable to open document stream")
+            ?: throw IOException(context.getString(R.string.error_open_document))
 
         inputStream.use { input ->
             target.outputStream().use { output ->

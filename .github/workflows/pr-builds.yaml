@@ -1,10 +1,7 @@
 name: PR builds
 
+# 上游 Ymir 桌面端 PR 构建。本仓库的 Android 构建见 android.yaml，此处仅保留手动触发。
 on:
-  pull_request:
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
   workflow_dispatch: # Enable manual runs
     inputs:
       pr-number:

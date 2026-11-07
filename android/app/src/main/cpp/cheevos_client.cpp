@@ -85,7 +85,7 @@ void LoadDone(int result, const char* error_message, rc_client_t* c, void* /*use
     } else if(result == RC_NO_GAME_LOADED) {
         self->on_no_set();
     } else {
-        self->on_game_failed(error_message ? error_message : "could not load achievements");
+        self->on_game_failed(error_message ? error_message : "无法加载成就");
     }
 }
 
@@ -113,7 +113,7 @@ bool login_with_password(Backend& http, const std::string& username, const std::
     params.password = password.c_str();
     rc_api_request_t request {};
     if(rc_api_init_login_request(&request, &params) != RC_OK) {
-        err = "could not build the sign-in request";
+        err = "无法构建登录请求";
         return false;
     }
     Request req;
@@ -124,7 +124,7 @@ bool login_with_password(Backend& http, const std::string& username, const std::
 
     const Response res = http.perform(req, user_agent());
     if(res.status == 0) {
-        err = res.error.empty() ? "could not reach RetroAchievements" : res.error;
+        err = res.error.empty() ? "无法连接到 RetroAchievements" : res.error;
         return false;
     }
     rc_api_server_response_t server {};
@@ -140,7 +140,7 @@ bool login_with_password(Backend& http, const std::string& username, const std::
         display_name = login.display_name ? login.display_name : login.username;
         score = login.score_softcore;
     } else {
-        err = login.response.error_message ? login.response.error_message : "sign-in failed";
+        err = login.response.error_message ? login.response.error_message : "登录失败";
     }
     rc_api_destroy_login_response(&login);
     return ok;
@@ -351,13 +351,13 @@ void Client::on_signed_in(const std::string& display_name)
 void Client::on_sign_in_failed(const std::string& why)
 {
     _state = State::SignedOut;
-    post(Message::Kind::Problem, "RetroAchievements sign-in failed", why);
+    post(Message::Kind::Problem, "RetroAchievements 登录失败", why);
 }
 
 void Client::on_game_loaded(const std::string& title)
 {
     _state = State::Playing;
-    post(Message::Kind::Info, title.empty() ? "Achievements loaded" : title, "achievements active");
+    post(Message::Kind::Info, title.empty() ? "成就已加载" : title, "achievements active");
 }
 
 // No popup: nothing has gone wrong and there's nothing to do.
@@ -370,15 +370,15 @@ void Client::on_no_set()
 {
     _state = State::NoSet;
     // A hash identifies a dump, not a game: a legitimate ROM can still miss.
-    post(Message::Kind::Problem, "No achievements for this disc",
-         "RetroAchievements doesn't recognize this dump (hash " + _hash + ")");
+    post(Message::Kind::Problem, "此光盘没有成就",
+         "RetroAchievements 无法识别此镜像（哈希值 " + _hash + "）");
 }
 
 void Client::on_game_failed(const std::string& why)
 {
     // A failed sign-in fails the pending load too; that must not read as signed in.
     if(_state != State::SignedOut) _state = State::SignedIn;
-    post(Message::Kind::Problem, "Could not load achievements", why);
+    post(Message::Kind::Problem, "无法加载成就", why);
 }
 
 // ── The loaded set ────────────────────────────────────────────────────────────
@@ -478,25 +478,25 @@ void Client::handle_event(const void* event_ptr)
         case RC_CLIENT_EVENT_ACHIEVEMENT_TRIGGERED:
             if(e->achievement && !IsWarning(e->achievement->id)) {
                 post(Message::Kind::Unlock,
-                     e->achievement->title ? e->achievement->title : "Achievement unlocked",
+                     e->achievement->title ? e->achievement->title : "成就解锁",
                      e->achievement->description ? e->achievement->description : "",
                      e->achievement->points,
                      e->achievement->badge_url ? e->achievement->badge_url : "");
             }
             break;
         case RC_CLIENT_EVENT_GAME_COMPLETED:
-            post(Message::Kind::Info, "All achievements earned", game_title());
+            post(Message::Kind::Info, "已获得全部成就", game_title());
             break;
         case RC_CLIENT_EVENT_SERVER_ERROR:
-            post(Message::Kind::Problem, "RetroAchievements error",
+            post(Message::Kind::Problem, "RetroAchievements 错误",
                  e->server_error && e->server_error->error_message ? e->server_error->error_message : "");
             break;
         case RC_CLIENT_EVENT_DISCONNECTED:
-            post(Message::Kind::Problem, "RetroAchievements offline",
-                 "Unlocks will be sent when the connection returns");
+            post(Message::Kind::Problem, "RetroAchievements 已离线",
+                 "连接恢复后将上传已解锁的成就");
             break;
         case RC_CLIENT_EVENT_RECONNECTED:
-            post(Message::Kind::Info, "RetroAchievements reconnected", "Pending unlocks sent");
+            post(Message::Kind::Info, "RetroAchievements 已重新连接", "待上传的成就已发送");
             break;
         default:
             break;

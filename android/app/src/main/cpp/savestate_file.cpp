@@ -53,7 +53,7 @@ void WriteSaveStateFile(std::ostream &out, const ymir::savestate::SaveState &sta
 void ReadSaveStateFile(const std::filesystem::path &path, ymir::savestate::SaveState &state) {
     std::ifstream in{path, std::ios::binary};
     if (!in) {
-        throw std::runtime_error("cannot open file");
+        throw std::runtime_error("无法打开文件");
     }
     std::string data{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
 
@@ -62,11 +62,11 @@ void ReadSaveStateFile(const std::filesystem::path &path, ymir::savestate::SaveS
     if (data.size() >= kHeaderSize && std::memcmp(data.data(), kMagic.data(), kMagic.size()) == 0) {
         const uint32_t headerVersion = ReadLE32(data.data() + 4);
         if (headerVersion > kHeaderVersion) {
-            throw std::runtime_error("made by a newer version of the app");
+            throw std::runtime_error("该存档由更新版本的应用创建");
         }
         revision = ReadLE32(data.data() + 8);
         if (revision > ymir::savestate::kPortLayoutRevision) {
-            throw std::runtime_error("made by a newer version of the app");
+            throw std::runtime_error("该存档由更新版本的应用创建");
         }
         payload = data.substr(kHeaderSize);
     } else {
@@ -96,7 +96,7 @@ void ReadSaveStateFile(const std::filesystem::path &path, ymir::savestate::SaveS
             }
         }
     }
-    throw std::runtime_error(firstError.empty() ? "unreadable save state" : firstError);
+    throw std::runtime_error(firstError.empty() ? "无法读取的即时存档" : firstError);
 }
 
 } // namespace neonsaturn::android

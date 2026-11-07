@@ -83,7 +83,7 @@ class LauncherActivity : AppCompatActivity() {
         }.onFailure { error ->
             Toast.makeText(
                 this,
-                "Unable to use that games folder: ${error.message ?: error::class.java.simpleName}",
+                getString(R.string.error_games_folder, error.message ?: error::class.java.simpleName),
                 Toast.LENGTH_LONG
             ).show()
         }.onSuccess {
@@ -219,7 +219,7 @@ class LauncherActivity : AppCompatActivity() {
         }.onFailure { error ->
             Toast.makeText(
                 this,
-                "Import failed: ${error.message ?: error::class.java.simpleName}",
+                getString(R.string.error_import_failed, error.message ?: error::class.java.simpleName),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -513,7 +513,7 @@ class LauncherActivity : AppCompatActivity() {
         content.findViewById<MaterialButton>(R.id.downloadCoversButton).setOnClickListener {
             val mode = currentViewMode
             if (mode == BootstrapStore.VIEW_MODE_LIST) {
-                Toast.makeText(this, "Switch to NA Boxes or Japan view first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.view_mode_switch_to_covers), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             dialog.dismiss()
@@ -577,7 +577,7 @@ class LauncherActivity : AppCompatActivity() {
             .setIcon(R.drawable.ic_trophy)
             .setView(content)
             .setPositiveButton(R.string.cheevos_sign_in, null)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.common_cancel, null)
             .create()
         dialog.setOnShowListener {
             val go = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
@@ -626,7 +626,7 @@ class LauncherActivity : AppCompatActivity() {
                 Achievements.signOut(this)
                 onSignedOut()
             }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.common_cancel, null)
             .show()
     }
 
@@ -643,7 +643,7 @@ class LauncherActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.bios_remove_title)
             .setMultiChoiceItems(labels, checked) { _, which, isChecked -> checked[which] = isChecked }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.common_cancel, null)
             .setPositiveButton(R.string.bios_remove_confirm) { _, _ ->
                 val toRemove = files.filterIndexed { index, _ -> checked[index] }
                 if (toRemove.size == files.size) {
@@ -777,7 +777,7 @@ class LauncherActivity : AppCompatActivity() {
                 }.onFailure { error ->
                     Toast.makeText(
                         this,
-                        "Unable to launch ${entry.title}: ${error.message ?: error::class.java.simpleName}",
+                        getString(R.string.error_launch_failed, entry.title, error.message ?: error::class.java.simpleName),
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -824,7 +824,7 @@ class LauncherActivity : AppCompatActivity() {
         }.onFailure { error ->
             Toast.makeText(
                 this,
-                "Storage migration warning: ${error.message ?: error::class.java.simpleName}",
+                getString(R.string.error_storage_migration, error.message ?: error::class.java.simpleName),
                 Toast.LENGTH_LONG
             ).show()
         }

@@ -612,7 +612,7 @@ class TouchControlsView @JvmOverloads constructor(
         textPaint.textSize = 14f * density
         textPaint.color = Color.argb(180, 255, 255, 255)
         val textY = tempRect.centerY() - ((textPaint.descent() + textPaint.ascent()) / 2f)
-        canvas.drawText("Game image area", tempRect.centerX(), textY, textPaint)
+        canvas.drawText(context.getString(R.string.touch_controls_game_area), tempRect.centerX(), textY, textPaint)
     }
 
     companion object {
@@ -629,7 +629,7 @@ class TouchControlsView @JvmOverloads constructor(
     private fun drawEditorInstruction(canvas: Canvas) {
         textPaint.textSize = 15f * density
         textPaint.color = Color.argb(220, 255, 255, 255)
-        canvas.drawText("Drag to move \u2022 tap to select \u2022 pinch to resize", width / 2f, 28f * density, textPaint)
+        canvas.drawText(context.getString(R.string.touch_controls_editor_instruction), width / 2f, 28f * density, textPaint)
     }
 
     private fun drawRoundButton(canvas: Canvas, controlId: TouchControlId, color: Int, textColor: Int = Color.WHITE) {

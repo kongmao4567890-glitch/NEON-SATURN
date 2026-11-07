@@ -65,7 +65,7 @@ public:
         Response res;
         JNIEnv *env = ThreadEnv();
         if (!env || !g_perform) {
-            res.error = "no Java transport";
+            res.error = "没有可用的 Java 网络传输";
             return res;
         }
         jstring url = env->NewStringUTF(req.url.c_str());
@@ -83,7 +83,7 @@ public:
         env->DeleteLocalRef(type);
         env->DeleteLocalRef(ua);
         if (!out) {
-            res.error = "the request failed";
+            res.error = "网络请求失败";
             return res;
         }
         const jsize n = env->GetArrayLength(out);
@@ -93,7 +93,7 @@ public:
         }
         env->DeleteLocalRef(out);
         if (bytes.size() < 4) {
-            res.error = "the request failed";
+            res.error = "网络请求失败";
             return res;
         }
         const auto b = reinterpret_cast<const unsigned char *>(bytes.data());

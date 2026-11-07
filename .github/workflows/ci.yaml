@@ -1,10 +1,8 @@
 name: CI build
 
+# 上游 Ymir 桌面端 CI。本仓库的 Android 构建见 android.yaml，此处仅保留手动触发。
 on:
-  push:
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
+  workflow_dispatch:
 
 permissions:
   packages: write

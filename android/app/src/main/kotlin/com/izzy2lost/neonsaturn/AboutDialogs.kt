@@ -26,7 +26,7 @@ object AboutDialogs {
     const val SOURCE_URL = "https://github.com/izzy2lost/NEON-SATURN"
     const val PRIVACY_POLICY_URL = "https://www.izzy2lost.com/neonsaturn-privacy"
 
-    private data class Credit(val name: String, val role: String, val url: String? = null)
+    private data class Credit(val name: Int, val role: Int, val url: String? = null)
 
     private data class Component(
         val name: String,
@@ -37,36 +37,24 @@ object AboutDialogs {
     )
 
     private val credits = listOf(
-        Credit("izzy2lost", "NEON SATURN Android port", SOURCE_URL),
+        Credit(0, R.string.credit_izzy2lost, SOURCE_URL),
+        Credit(R.string.credit_ymir_name, R.string.credit_ymir, "https://github.com/StrikerX3/Ymir"),
+        Credit(R.string.credit_support_ymir, R.string.credit_support_ymir_desc, "https://www.patreon.com/StrikerX3"),
+        Credit(R.string.credit_kronos_name, R.string.credit_kronos, "https://github.com/FCare/Kronos"),
+        Credit(R.string.credit_sdl_name, R.string.credit_sdl, "https://www.libsdl.org"),
         Credit(
-            "StrikerX3 and the Ymir contributors",
-            "Ymir, the Sega Saturn emulator whose core runs every game here",
-            "https://github.com/StrikerX3/Ymir",
-        ),
-        Credit(
-            "Support Ymir",
-            "Back the upstream author on Patreon",
-            "https://www.patreon.com/StrikerX3",
-        ),
-        Credit(
-            "Kronos and Yabause authors",
-            "6x xBRZ upscaling shader",
-            "https://github.com/FCare/Kronos",
-        ),
-        Credit("The SDL team", "Windowing, audio, input and the Android activity", "https://www.libsdl.org"),
-        Credit(
-            "SDL_GameControllerDB contributors",
-            "Gamepad mappings",
+            R.string.credit_gamecontrollerdb_name,
+            R.string.credit_gamecontrollerdb,
             "https://github.com/mdqinc/SDL_GameControllerDB",
         ),
-        Credit("saturn-covers", "Box and jewel case artwork", "https://github.com/izzy2lost/saturn-covers"),
+        Credit(-1, R.string.credit_covers, "https://github.com/izzy2lost/saturn-covers"),
     )
 
     private val components = listOf(
         Component("NEON SATURN", "GPL-3.0", SOURCE_URL, listOf("GPL-3.0.txt")),
         Component("Ymir", "GPL-3.0", "https://github.com/StrikerX3/Ymir", listOf("GPL-3.0.txt")),
         Component(
-            "6x xBRZ shader (Kronos / Yabause)",
+            "6 倍 xBRZ 着色器（Kronos / Yabause）",
             "GPL-2.0-or-later",
             "https://github.com/FCare/Kronos",
             listOf("xBRZ-shader-NOTICE.txt", "GPL-2.0.txt"),
@@ -90,20 +78,20 @@ object AboutDialogs {
         Component("xxHash", "BSD-2-Clause", "https://github.com/Cyan4973/xxHash", listOf("xxHash-LICENSE.txt")),
         Component("LZ4", "BSD-2-Clause", "https://github.com/lz4/lz4", listOf("lz4-LICENSE.txt")),
         Component("libchdr", "BSD-3-Clause", "https://github.com/rtissera/libchdr", listOf("libchdr-LICENSE.txt")),
-        Component("LZMA SDK", "Public domain", "https://www.7-zip.org/sdk.html", listOf("lzma-LICENSE.txt")),
+        Component("LZMA SDK", "公有领域", "https://www.7-zip.org/sdk.html", listOf("lzma-LICENSE.txt")),
         Component("miniz", "MIT", "https://github.com/richgel999/miniz", listOf("miniz-LICENSE.txt")),
         Component("Zstandard", "BSD-3-Clause", "https://github.com/facebook/zstd", listOf("zstd-LICENSE.txt")),
-        Component("stb", "MIT / Public domain", "https://github.com/nothings/stb", listOf("stb-LICENSE.txt")),
-        Component("dr_libs", "Public domain / MIT-0", "https://github.com/mackron/dr_libs", listOf("dr_libs-LICENSE.txt")),
+        Component("stb", "MIT / 公有领域", "https://github.com/nothings/stb", listOf("stb-LICENSE.txt")),
+        Component("dr_libs", "公有领域 / MIT-0", "https://github.com/mackron/dr_libs", listOf("dr_libs-LICENSE.txt")),
         Component("AndroidX", "Apache-2.0", "https://developer.android.com/jetpack/androidx", listOf("Apache-2.0.txt")),
         Component(
-            "Material Components for Android",
+            "Material Components for Android（Material 组件库）",
             "Apache-2.0",
             "https://github.com/material-components/material-components-android",
             listOf("Apache-2.0.txt"),
         ),
         Component("Coil", "Apache-2.0", "https://github.com/coil-kt/coil", listOf("Apache-2.0.txt")),
-        Component("Kotlin standard library", "Apache-2.0", "https://kotlinlang.org", listOf("Apache-2.0.txt")),
+        Component("Kotlin 标准库", "Apache-2.0", "https://kotlinlang.org", listOf("Apache-2.0.txt")),
     )
 
     fun appVersion(activity: Activity): String =
@@ -113,7 +101,12 @@ object AboutDialogs {
     fun showCredits(activity: Activity) {
         val list = listContainer(activity)
         for (credit in credits) {
-            list.addView(entryView(activity, credit.name, credit.role, credit.url) {
+            val name = when (credit.name) {
+                0 -> "izzy2lost"
+                -1 -> "saturn-covers"
+                else -> activity.getString(credit.name)
+            }
+            list.addView(entryView(activity, name, activity.getString(credit.role), credit.url) {
                 credit.url?.let { openUrl(activity, it) }
             })
         }
@@ -142,7 +135,7 @@ object AboutDialogs {
         val text = component.assetFiles.joinToString("\n\n────────────────────\n\n") { file ->
             runCatching {
                 activity.assets.open("licenses/$file").bufferedReader().use { it.readText().trimEnd() }
-            }.getOrElse { "($file is missing from this build)" }
+            }.getOrElse { activity.getString(R.string.license_file_missing, file) }
         }
         val body = TextView(activity).apply {
             this.text = text
@@ -155,7 +148,7 @@ object AboutDialogs {
             .setTitle("${component.name} · ${component.licence}")
             .setView(ScrollView(activity).apply { addView(body) })
             .setNeutralButton(R.string.about_open_website) { _, _ -> openUrl(activity, component.url) }
-            .setPositiveButton(android.R.string.ok, null)
+            .setPositiveButton(R.string.common_ok, null)
             .show()
     }
 
@@ -163,7 +156,7 @@ object AboutDialogs {
         MaterialAlertDialogBuilder(activity, R.style.ThemeOverlay_NeonSaturn_LibrarySettingsDialog)
             .setTitle(title)
             .setView(ScrollView(activity).apply { addView(list) })
-            .setPositiveButton(android.R.string.ok, null)
+            .setPositiveButton(R.string.common_ok, null)
             .show()
     }
 

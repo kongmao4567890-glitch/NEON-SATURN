@@ -1,8 +1,8 @@
 name: Stable release
 
+# 上游 Ymir 桌面端正式版发布。本仓库的 Android 构建见 android.yaml，此处仅保留手动触发。
 on:
-  push:
-    tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   packages: write

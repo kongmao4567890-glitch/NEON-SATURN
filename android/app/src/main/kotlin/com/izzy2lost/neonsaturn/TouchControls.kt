@@ -4,10 +4,10 @@ enum class TouchControlId(
     val label: String,
     val preferenceKey: String
 ) {
-    DPAD("D-Pad", "dpad"),
-    ANALOG("Stick", "analog"),
-    START("Start", "start"),
-    MENU("Menu", "menu"),
+    DPAD("方向键", "dpad"),
+    ANALOG("摇杆", "analog"),
+    START("开始", "start"),
+    MENU("菜单", "menu"),
     A("A", "a"),
     B("B", "b"),
     C("C", "c"),
@@ -19,7 +19,7 @@ enum class TouchControlId(
 
     // Emulator action rather than a Saturn button - it drives the rewind buffer, not the
     // pad report.
-    REWIND("Rewind", "rewind"),
+    REWIND("倒带", "rewind"),
 }
 
 data class TouchControlPlacement(

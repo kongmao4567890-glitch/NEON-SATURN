@@ -55,10 +55,10 @@ object BiosIdentifier {
     fun label(context: Context, info: BiosInfo?): String {
         if (info == null) return context.getString(R.string.bios_unknown)
         val variant = when (info.variant) {
-            "HISATURN" -> "HiSaturn"
-            "VSATURN" -> "V-Saturn"
-            "DEVKIT" -> "Dev kit"
-            else -> "Saturn"
+            "HISATURN" -> context.getString(R.string.bios_variant_hisaturn)
+            "VSATURN" -> context.getString(R.string.bios_variant_vsaturn)
+            "DEVKIT" -> context.getString(R.string.bios_variant_devkit)
+            else -> context.getString(R.string.bios_variant_saturn)
         }
         val region = when (info.region) {
             Region.US_EU -> context.getString(R.string.bios_region_us_eu)

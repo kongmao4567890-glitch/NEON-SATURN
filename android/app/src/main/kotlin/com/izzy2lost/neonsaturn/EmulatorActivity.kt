@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.format.DateUtils
 import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -293,7 +292,7 @@ class EmulatorActivity : SDLActivity() {
         dialog = MaterialAlertDialogBuilder(dialogContext, R.style.ThemeOverlay_NeonSaturn_QuickActionsDialog)
             .setTitle(if (save) R.string.save_state_select_save_slot else R.string.save_state_select_load_slot)
             .setView(content)
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.common_cancel, null)
             .create()
         dialog.setOnDismissListener {
             saveStateSlotsDialog = null
@@ -307,11 +306,8 @@ class EmulatorActivity : SDLActivity() {
     }
 
     private fun formatSavedAt(slot: SaveStateSlot): String =
-        DateUtils.formatDateTime(
-            this,
-            slot.savedAtMillis,
-            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_MONTH,
-        )
+        java.text.SimpleDateFormat(getString(R.string.save_state_date_format), java.util.Locale.CHINA)
+            .format(java.util.Date(slot.savedAtMillis))
 
     private fun showSaveStatePreview(dialogContext: Context, slot: SaveStateSlot) {
         val bitmap = slot.decodeThumbnail() ?: return
@@ -321,7 +317,7 @@ class EmulatorActivity : SDLActivity() {
         MaterialAlertDialogBuilder(dialogContext, R.style.ThemeOverlay_NeonSaturn_QuickActionsDialog)
             .setTitle(getString(R.string.save_state_preview_title, slot.number, formatSavedAt(slot)))
             .setView(content)
-            .setPositiveButton(android.R.string.ok, null)
+            .setPositiveButton(R.string.common_ok, null)
             .show()
     }
 
@@ -334,7 +330,7 @@ class EmulatorActivity : SDLActivity() {
         Thread({
             val message = runCatching {
                 if (save) nativeSaveState(slot.index) else nativeLoadState(slot.index)
-            }.getOrElse { it.message ?: "Save state operation failed" }
+            }.getOrElse { it.message ?: getString(R.string.save_state_operation_failed) }
 
             runOnUiThread {
                 saveStateOperationRunning = false

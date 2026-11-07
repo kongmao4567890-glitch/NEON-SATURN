@@ -1,0 +1,161 @@
+name: Android 构建（汉化版 APK）
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["android-v*"]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NDK_VERSION: "30.0.15729638"
+  CMAKE_VERSION: "3.30.3"
+  BUILD_TOOLS_VERSION: "36.1.0"
+  PLATFORM_VERSION: "android-36"
+  VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/.vcpkg-archives
+
+jobs:
+  build-android:
+    name: 构建 APK (arm64-v8a)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      HAS_SIGNING_SECRET: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+
+    steps:
+      - name: 释放磁盘空间
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          df -h
+
+      - name: 检出代码（含子模块）
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: 安装 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: 安装 Android SDK 组件（NDK / CMake / Build-Tools）
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install \
+            "platforms;${PLATFORM_VERSION}" \
+            "build-tools;${BUILD_TOOLS_VERSION}" \
+            "ndk;${NDK_VERSION}" \
+            "cmake;${CMAKE_VERSION}" > /dev/null
+          # 运行器预装的 ANDROID_NDK_HOME 指向其他版本的 NDK，这里改为项目要求的版本
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK=$ANDROID_HOME/ndk/${NDK_VERSION}" >> "$GITHUB_ENV"
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+
+      - name: 恢复 vcpkg 二进制缓存
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-android-${{ hashFiles('android/vcpkg.json', 'android/vcpkg-configuration.json', 'android/vcpkg-triplets/**') }}-${{ env.NDK_VERSION }}
+          restore-keys: |
+            vcpkg-android-
+
+      - name: 初始化 vcpkg
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
+      - name: 配置 Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 恢复 CI 签名密钥
+        id: keystore-cache
+        if: ${{ env.HAS_SIGNING_SECRET != 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/neonsaturn-ci.jks
+          key: neonsaturn-ci-keystore-v1
+
+      - name: 准备签名配置
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          KS="$RUNNER_TEMP/neonsaturn-ci.jks"
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "使用仓库 Secrets 中的正式签名密钥"
+            echo "$KEYSTORE_BASE64" | base64 -d > "$KS"
+          else
+            echo "::notice::未配置 ANDROID_KEYSTORE_BASE64，使用 CI 自动生成的签名密钥（已缓存复用）"
+            KEYSTORE_PASSWORD=neonsaturn
+            KEY_ALIAS=neonsaturn
+            KEY_PASSWORD=neonsaturn
+            if [ ! -f "$KS" ]; then
+              keytool -genkeypair -noprompt -keystore "$KS" -storetype PKCS12 \
+                -storepass "$KEYSTORE_PASSWORD" -keypass "$KEY_PASSWORD" -alias "$KEY_ALIAS" \
+                -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=NEON SATURN CI, O=NEON SATURN"
+            fi
+          fi
+          {
+            echo "storeFile=$KS"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: 编译 Release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace assembleRelease
+
+      - name: 整理产物
+        id: output
+        run: |
+          VERSION=$(sed -nr 's/.*versionName = "([^"]+)".*/\1/p' android/app/build.gradle.kts)
+          SHORT_SHA=${GITHUB_SHA::8}
+          NAME="NEON-SATURN-zh-CN-${VERSION}-${SHORT_SHA}"
+          mkdir -p dist
+          APK=$(find android/app/build/outputs/apk/release -name '*.apk' | head -n 1)
+          cp "$APK" "dist/${NAME}.apk"
+          SYMBOLS=$(find android/app/build/outputs/native-debug-symbols -name '*.zip' 2>/dev/null | head -n 1 || true)
+          if [ -n "$SYMBOLS" ]; then cp "$SYMBOLS" "dist/${NAME}-native-symbols.zip"; fi
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          ls -la dist
+
+      - name: 上传 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.output.outputs.name }}
+          path: dist/*
+          if-no-files-found: error
+
+      - name: 发布 Release（推送 android-v* 标签时）
+        if: startsWith(github.ref, 'refs/tags/android-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: NEON SATURN 汉化版 ${{ github.ref_name }}
+          files: dist/*
+          body: |
+            NEON SATURN（世嘉土星模拟器 Ymir 的 Android 移植版）简体中文汉化版。
+
+            - 需要 Android 9（API 28）及以上、64 位 ARM 设备
+            - 不包含任何 BIOS 或游戏文件

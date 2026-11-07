@@ -119,7 +119,7 @@ object Achievements {
                 .setTitle(R.string.cheevos_title)
                 .setIcon(R.drawable.ic_trophy)
                 .setMessage(problem)
-                .setPositiveButton(android.R.string.ok, null)
+                .setPositiveButton(R.string.common_ok, null)
                 .create()
         }
 
