@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>NEON SATURN 海报</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700;900&family=Orbitron:wght@800;900&display=swap">
+<style>
+  :root {
+    --sky-top: #04060D;
+    --sky-bottom: #0D1117;
+    --cyan: #4ED8FF;
+    --violet: #7A5CFF;
+    --text: #F2F8FF;
+    --muted: #A9BCD0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--sky-top); }
+  body {
+    font-family: "Noto Sans SC", "WenQuanYi Zen Hei", sans-serif;
+    color: var(--text);
+  }
+  .poster {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 78% 30%, rgba(122, 92, 255, 0.38), transparent 55%),
+      radial-gradient(ellipse at 12% 85%, rgba(78, 216, 255, 0.22), transparent 55%),
+      linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+  }
+  #stars { position: absolute; inset: 0; }
+  .planet { position: absolute; }
+  .content { position: relative; z-index: 2; display: flex; flex-direction: column; }
+
+  .badge {
+    display: inline-block;
+    align-self: flex-start;
+    font-weight: 900;
+    color: #04141B;
+    background: var(--cyan);
+    border-radius: 999px;
+    box-shadow: 0 0 40px rgba(78, 216, 255, 0.55);
+  }
+  .title {
+    font-family: "Orbitron", "Noto Sans SC", sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    background: linear-gradient(90deg, #FFFFFF 0%, var(--cyan) 55%, #B9A8FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 28px rgba(78, 216, 255, 0.45));
+  }
+  .subtitle { font-weight: 900; line-height: 1.2; }
+  .subtitle em { font-style: normal; color: var(--cyan); }
+  .features { display: grid; }
+  .feature {
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    background: rgba(21, 27, 35, 0.78);
+    border: 3px solid rgba(78, 216, 255, 0.45);
+    border-radius: 28px;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+  .feature .dot {
+    flex: none;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 18px var(--cyan);
+  }
+  .footer { font-weight: 700; color: var(--muted); }
+
+  /* ---------- 4:3 ---------- */
+  .r43 { width: 1600px; height: 1200px; }
+  .r43 .planet { width: 980px; right: -230px; top: -110px; }
+  .r43 .content { padding: 76px 100px; height: 100%; }
+  .r43 .badge { font-size: 44px; padding: 8px 34px; }
+  .r43 .title { font-size: 150px; margin-top: 30px; }
+  .r43 .subtitle { font-size: 66px; margin-top: 26px; }
+  .r43 .features { grid-template-columns: 1fr 1fr; gap: 22px 28px; margin-top: auto; }
+  .r43 .feature { font-size: 52px; padding: 22px 32px; gap: 22px; }
+  .r43 .feature .dot { width: 22px; height: 22px; }
+  .r43 .footer { font-size: 38px; margin-top: 32px; }
+
+  /* ---------- 16:9 ---------- */
+  .r169 { width: 1920px; height: 1080px; }
+  .r169 .planet { width: 1000px; right: -120px; top: 20px; }
+  .r169 .content { padding: 64px 100px; height: 100%; width: 1260px; }
+  .r169 .badge { font-size: 42px; padding: 8px 32px; }
+  .r169 .title { font-size: 136px; margin-top: 24px; }
+  .r169 .subtitle { font-size: 60px; margin-top: 22px; }
+  .r169 .features { grid-template-columns: 1fr 1fr; gap: 18px 24px; margin-top: auto; }
+  .r169 .feature { font-size: 46px; padding: 18px 28px; gap: 20px; }
+  .r169 .feature .dot { width: 20px; height: 20px; }
+  .r169 .footer { font-size: 36px; margin-top: 28px; }
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <canvas id="stars"></canvas>
+
+  <svg class="planet" viewBox="0 0 1000 1000" aria-hidden="true">
+    <defs>
+      <radialGradient id="sphere" cx="38%" cy="32%" r="75%">
+        <stop offset="0%" stop-color="#C9F3FF"/>
+        <stop offset="28%" stop-color="#4ED8FF"/>
+        <stop offset="62%" stop-color="#5B47D6"/>
+        <stop offset="100%" stop-color="#120C3A"/>
+      </radialGradient>
+      <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#7A5CFF" stop-opacity="0.15"/>
+        <stop offset="30%" stop-color="#4ED8FF" stop-opacity="0.95"/>
+        <stop offset="70%" stop-color="#B9A8FF" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="#7A5CFF" stop-opacity="0.15"/>
+      </linearGradient>
+      <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="18" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <clipPath id="backHalf"><rect x="0" y="0" width="1000" height="500"/></clipPath>
+      <clipPath id="frontHalf"><rect x="0" y="500" width="1000" height="500"/></clipPath>
+    </defs>
+    <g transform="rotate(-18 500 500)">
+      <!-- 光环后半部分 -->
+      <g clip-path="url(#backHalf)" filter="url(#glow)">
+        <ellipse cx="500" cy="500" rx="470" ry="120" fill="none" stroke="url(#ring)" stroke-width="34"/>
+        <ellipse cx="500" cy="500" rx="410" ry="98" fill="none" stroke="url(#ring)" stroke-width="12" opacity="0.7"/>
+      </g>
+      <!-- 星球 -->
+      <circle cx="500" cy="500" r="270" fill="url(#sphere)" filter="url(#glow)"/>
+      <ellipse cx="500" cy="440" rx="262" ry="34" fill="#FFFFFF" opacity="0.08"/>
+      <ellipse cx="500" cy="540" rx="250" ry="26" fill="#000000" opacity="0.12"/>
+      <!-- 光环前半部分 -->
+      <g clip-path="url(#frontHalf)" filter="url(#glow)">
+        <ellipse cx="500" cy="500" rx="470" ry="120" fill="none" stroke="url(#ring)" stroke-width="34"/>
+        <ellipse cx="500" cy="500" rx="410" ry="98" fill="none" stroke="url(#ring)" stroke-width="12" opacity="0.7"/>
+      </g>
+    </g>
+  </svg>
+
+  <div class="content">
+    <span class="badge">简体中文汉化版</span>
+    <h1 class="title">NEON<br>SATURN</h1>
+    <p class="subtitle">世嘉土星模拟器 · <em>安卓手机畅玩</em></p>
+
+    <div class="features">
+      <div class="feature"><span class="dot"></span>界面全中文</div>
+      <div class="feature"><span class="dot"></span>最高 8 倍分辨率</div>
+      <div class="feature"><span class="dot"></span>即时存档 · 倒带</div>
+      <div class="feature"><span class="dot"></span>封面游戏库</div>
+      <div class="feature"><span class="dot"></span>触屏按键自由布局</div>
+      <div class="feature"><span class="dot"></span>手柄 · 成就系统</div>
+    </div>
+    <p class="footer">安卓 9 以上 · 64 位 ARM · 开源免费 · 不含 BIOS 与游戏</p>
+  </div>
+</div>
+
+<script>
+  const ratio = new URLSearchParams(location.search).get("ratio") === "169" ? "r169" : "r43";
+  const poster = document.getElementById("poster");
+  poster.classList.add(ratio);
+
+  // 固定种子的星空，每次渲染结果一致
+  let seed = 20261108;
+  const rand = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  const canvas = document.getElementById("stars");
+  const w = poster.offsetWidth, h = poster.offsetHeight, s = 2;
+  canvas.width = w * s; canvas.height = h * s;
+  canvas.style.width = w + "px"; canvas.style.height = h + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(s, s);
+  for (let i = 0; i < 520; i++) {
+    const x = rand() * w, y = rand() * h, r = rand() < 0.92 ? rand() * 1.6 + 0.4 : rand() * 2.6 + 1.6;
+    ctx.globalAlpha = rand() * 0.6 + 0.35;
+    ctx.fillStyle = rand() < 0.15 ? "#4ED8FF" : "#EAF4FF";
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+</script>
+</body>
+</html>
